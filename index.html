@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>두성터득기 - 실시간 음정 분석</title>
+
+    <!-- SEO -->
+    <meta
+      name="description"
+      content="마이크로 내 음역과 불안정 구간을 분석하고 두성 훈련 루트를 제안하는 보컬 트레이닝 도구."
+    />
+    <meta
+      name="keywords"
+      content="두성, 보컬, 음역, 음정 분석, 헤드보이스, 트레이닝"
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://temple.funnyfunny.cloud/" />
+
+    <!-- OG (og-image text MUST be English) -->
+    <meta property="og:title" content="Head Voice Trainer" />
+    <meta
+      property="og:description"
+      content="Realtime pitch analysis and training steps to reach head voice safely."
+    />
+    <meta
+      property="og:image"
+      content="https://dummyimage.com/1200x630/0b1220/ffffff&text=Head+Voice+Trainer"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://temple.funnyfunny.cloud/" />
+
+    <!-- Favicon (auto SVG) -->
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='100%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%230b1220'/%3E%3Cstop offset='100%25' stop-color='%2322c55e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3C/svg%3E"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+
+  <body
+    class="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 text-white"
+  >
+    <main class="max-w-3xl mx-auto px-4 py-10">
+      <header class="text-center mb-8">
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10"
+        >
+          <span class="text-emerald-300 text-sm font-semibold">두성터득기</span>
+          <span class="text-white/50 text-sm">Pitch Analyzer MVP</span>
+        </div>
+        <h1 class="mt-4 text-3xl md:text-4xl font-extrabold tracking-tight">
+          실시간 음정 분석
+        </h1>
+        <p class="mt-2 text-white/70">
+          마이크 입력으로 Hz / 음이름 / 음역을 표시합니다. (진단이 아닌 연습
+          보조 도구)
+        </p>
+      </header>
+
+      <!-- Controls -->
+      <section
+        class="rounded-2xl bg-white/5 border border-white/10 p-6 shadow-lg"
+      >
+        <div
+          class="flex flex-col md:flex-row gap-3 md:items-center md:justify-between"
+        >
+          <div class="flex gap-3">
+            <button
+              id="startBtn"
+              class="px-4 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold transition-colors"
+            >
+              마이크 시작
+            </button>
+            <button
+              id="stopBtn"
+              class="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-semibold transition-colors"
+              disabled
+            >
+              정지
+            </button>
+          </div>
+          <div class="text-sm text-white/60">
+            샘플레이트: <span id="sr">-</span> Hz · 상태:
+            <span id="status">대기</span>
+          </div>
+        </div>
+
+        <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="rounded-xl bg-black/20 border border-white/10 p-4">
+            <p class="text-xs text-white/50">현재 음정</p>
+            <p class="mt-1 text-2xl font-extrabold"><span id="note">-</span></p>
+            <p class="mt-1 text-sm text-white/60"><span id="cents">-</span></p>
+          </div>
+          <div class="rounded-xl bg-black/20 border border-white/10 p-4">
+            <p class="text-xs text-white/50">주파수(Hz)</p>
+            <p class="mt-1 text-2xl font-extrabold"><span id="hz">-</span></p>
+            <p class="mt-1 text-sm text-white/60">
+              볼륨: <span id="rms">-</span>
+            </p>
+          </div>
+          <div class="rounded-xl bg-black/20 border border-white/10 p-4">
+            <p class="text-xs text-white/50">음역(기록)</p>
+            <p class="mt-1 font-semibold">
+              최저: <span id="minNote">-</span> · 최고:
+              <span id="maxNote">-</span>
+            </p>
+            <p class="mt-1 text-sm text-white/60">
+              안정 최고음(대략): <span id="stableMax">-</span>
+            </p>
+          </div>
+        </div>
+
+        <p class="mt-4 text-xs text-white/50">
+          ※ “안정 최고음”은 피치 검출 성공률/떨림이 상대적으로 좋은 구간을
+          기반으로 대략 계산합니다.
+        </p>
+      </section>
+
+      <!-- Mini coaching -->
+      <section class="mt-6 rounded-2xl bg-white/5 border border-white/10 p-6">
+        <h2 class="text-lg font-bold">코치 한 줄</h2>
+        <p id="coach" class="mt-2 text-white/80 leading-relaxed">
+          마이크를 시작하고 편한 음에서 위로 ‘슬라이드’해 보세요. 힘으로
+          밀기보다 가볍게 연결하는 느낌을 찾는 게 먼저입니다.
+        </p>
+      </section>
+
+      <!-- Other services button -->
+      <div class="flex justify-center pt-8 mt-12 border-t border-gray-200/20">
+        <a
+          href="https://funnyfunny.cloud/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-lg font-medium transition-colors duration-200"
+        >
+          다른 서비스 보기
+        </a>
+      </div>
+
+      <footer class="mt-6 text-center text-xs text-white/40">
+        © <span id="year"></span> Head Voice Trainer MVP
+      </footer>
+    </main>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+
+      $("year").textContent = new Date().getFullYear();
+
+      // ---------- Pitch helpers ----------
+      const NOTE_NAMES = [
+        "C",
+        "C#",
+        "D",
+        "D#",
+        "E",
+        "F",
+        "F#",
+        "G",
+        "G#",
+        "A",
+        "A#",
+        "B",
+      ];
+
+      function freqToMidi(freq) {
+        return 69 + 12 * Math.log2(freq / 440);
+      }
+      function midiToFreq(midi) {
+        return 440 * Math.pow(2, (midi - 69) / 12);
+      }
+      function midiToName(midi) {
+        const m = Math.round(midi);
+        const name = NOTE_NAMES[((m % 12) + 12) % 12];
+        const octave = Math.floor(m / 12) - 1;
+        return `${name}${octave}`;
+      }
+      function centsOff(freq) {
+        const midi = freqToMidi(freq);
+        const nearest = Math.round(midi);
+        const ref = midiToFreq(nearest);
+        const cents = 1200 * Math.log2(freq / ref);
+        return Math.round(cents);
+      }
+
+      // Autocorrelation pitch detection (simple + robust enough for MVP)
+      function autoCorrelate(buffer, sampleRate) {
+        // Compute RMS to ignore silence
+        let rms = 0;
+        for (let i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
+        rms = Math.sqrt(rms / buffer.length);
+        if (rms < 0.01) return { freq: null, rms };
+
+        // Remove DC offset
+        let mean = 0;
+        for (let i = 0; i < buffer.length; i++) mean += buffer[i];
+        mean /= buffer.length;
+        for (let i = 0; i < buffer.length; i++) buffer[i] -= mean;
+
+        const SIZE = buffer.length;
+        const MIN_F = 70; // ~D2
+        const MAX_F = 1100; // ~C6
+        const minLag = Math.floor(sampleRate / MAX_F);
+        const maxLag = Math.floor(sampleRate / MIN_F);
+
+        let bestLag = -1;
+        let bestCorr = 0;
+
+        // Normalized autocorrelation
+        for (let lag = minLag; lag <= maxLag; lag++) {
+          let corr = 0;
+          let normA = 0;
+          let normB = 0;
+          for (let i = 0; i < SIZE - lag; i++) {
+            const a = buffer[i];
+            const b = buffer[i + lag];
+            corr += a * b;
+            normA += a * a;
+            normB += b * b;
+          }
+          const denom = Math.sqrt(normA * normB) || 1;
+          const c = corr / denom;
+
+          if (c > bestCorr) {
+            bestCorr = c;
+            bestLag = lag;
+          }
+        }
+
+        // Require reasonable correlation confidence
+        if (bestCorr < 0.55 || bestLag === -1) return { freq: null, rms };
+
+        // Parabolic interpolation around bestLag for smoother freq
+        // (Use raw correlation array around bestLag by recalculating small window)
+        function corrAt(lag) {
+          let corr = 0,
+            normA = 0,
+            normB = 0;
+          for (let i = 0; i < SIZE - lag; i++) {
+            const a = buffer[i],
+              b = buffer[i + lag];
+            corr += a * b;
+            normA += a * a;
+            normB += b * b;
+          }
+          const denom = Math.sqrt(normA * normB) || 1;
+          return corr / denom;
+        }
+        const c0 = corrAt(bestLag - 1);
+        const c1 = corrAt(bestLag);
+        const c2 = corrAt(bestLag + 1);
+        const denom = c0 - 2 * c1 + c2;
+        const shift = denom ? (0.5 * (c0 - c2)) / denom : 0;
+        const lagInterp = bestLag + shift;
+
+        const freq = sampleRate / lagInterp;
+        return { freq, rms };
+      }
+
+      // ---------- App state ----------
+      let audioCtx = null;
+      let analyser = null;
+      let mediaStream = null;
+      let rafId = null;
+
+      let minMidi = Infinity;
+      let maxMidi = -Infinity;
+
+      // Rough "stable max" tracking (count frames per midi bucket with confidence)
+      const bucket = new Map(); // midiInt -> { ok, total }
+      function updateStability(midi, ok) {
+        const k = Math.round(midi);
+        const v = bucket.get(k) || { ok: 0, total: 0 };
+        v.total += 1;
+        if (ok) v.ok += 1;
+        bucket.set(k, v);
+      }
+      function getStableMax() {
+        // stable = okRate >= 0.75 and total >= 25
+        let best = null;
+        for (const [k, v] of bucket.entries()) {
+          const rate = v.total ? v.ok / v.total : 0;
+          if (v.total >= 25 && rate >= 0.75) {
+            if (best === null || k > best) best = k;
+          }
+        }
+        return best;
+      }
+
+      function setStatus(text) {
+        $("status").textContent = text;
+      }
+
+      function resetStats() {
+        minMidi = Infinity;
+        maxMidi = -Infinity;
+        bucket.clear();
+        $("minNote").textContent = "-";
+        $("maxNote").textContent = "-";
+        $("stableMax").textContent = "-";
+      }
+
+      function render(freq, rms) {
+        if (!freq) {
+          $("hz").textContent = "-";
+          $("note").textContent = "-";
+          $("cents").textContent = "-";
+          $("rms").textContent = rms ? rms.toFixed(3) : "-";
+          return;
+        }
+
+        const midi = freqToMidi(freq);
+        const name = midiToName(midi);
+        const cents = centsOff(freq);
+
+        $("hz").textContent = freq.toFixed(1);
+        $("note").textContent = name;
+        $("cents").textContent =
+          cents === 0
+            ? "정확"
+            : cents > 0
+            ? `+${cents} cents`
+            : `${cents} cents`;
+        $("rms").textContent = rms.toFixed(3);
+
+        if (midi < minMidi) minMidi = midi;
+        if (midi > maxMidi) maxMidi = midi;
+
+        $("minNote").textContent = isFinite(minMidi)
+          ? midiToName(minMidi)
+          : "-";
+        $("maxNote").textContent = isFinite(maxMidi)
+          ? midiToName(maxMidi)
+          : "-";
+
+        // "ok" if rms decent and cents not too wild
+        const ok = rms >= 0.02 && Math.abs(cents) <= 35;
+        updateStability(midi, ok);
+        const stableMax = getStableMax();
+        $("stableMax").textContent =
+          stableMax !== null ? midiToName(stableMax) : "-";
+
+        // Tiny coaching hint
+        const coachLines = [
+          "고음에서 힘이 들어가면, 먼저 볼륨을 줄이고 더 가볍게 연결해 보세요.",
+          "입을 더 크게 벌리기보다, 소리를 위로 ‘옮긴다’는 느낌을 찾아보세요.",
+          "목을 밀지 말고, 숨이 길게 흐르는지 먼저 확인해 보세요.",
+          "불안정 구간에선 ‘올리기’보다 ‘끊기지 않게 잇기’가 목표입니다.",
+        ];
+        if (ok && Math.random() < 0.02)
+          $("coach").textContent =
+            coachLines[Math.floor(Math.random() * coachLines.length)];
+      }
+
+      function loop() {
+        const buf = new Float32Array(analyser.fftSize);
+        analyser.getFloatTimeDomainData(buf);
+
+        const { freq, rms } = autoCorrelate(buf, audioCtx.sampleRate);
+        render(freq, rms);
+
+        rafId = requestAnimationFrame(loop);
+      }
+
+      async function startMic() {
+        resetStats();
+        try {
+          setStatus("권한 요청 중");
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false,
+            },
+          });
+
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          $("sr").textContent = Math.round(audioCtx.sampleRate);
+
+          const source = audioCtx.createMediaStreamSource(mediaStream);
+          analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 2048;
+          source.connect(analyser);
+
+          setStatus("측정 중");
+          $("startBtn").disabled = true;
+          $("stopBtn").disabled = false;
+
+          loop();
+        } catch (e) {
+          console.error(e);
+          setStatus("실패");
+          alert("마이크 권한을 허용해야 동작합니다.");
+        }
+      }
+
+      function stopMic() {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+
+        if (mediaStream) {
+          mediaStream.getTracks().forEach((t) => t.stop());
+          mediaStream = null;
+        }
+        if (audioCtx) {
+          audioCtx.close();
+          audioCtx = null;
+        }
+        analyser = null;
+
+        $("startBtn").disabled = false;
+        $("stopBtn").disabled = true;
+        $("sr").textContent = "-";
+        setStatus("대기");
+      }
+
+      $("startBtn").addEventListener("click", startMic);
+      $("stopBtn").addEventListener("click", stopMic);
+    </script>
+  </body>
+</html>
