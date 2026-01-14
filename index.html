@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>두성터득기 - 실시간 음정 분석</title>
+    <title data-i18n-title="metaTitle">두성터득기 - 실시간 음정 분석</title>
 
     <!-- SEO -->
     <meta
@@ -77,17 +77,59 @@
         text-align: center;
 }
   </style>
+  <style>
+    .lang-switch {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      display: inline-flex;
+      gap: 0;
+      padding: 3px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+    }
+    .lang-switch button {
+      border: none;
+      background: transparent;
+      color: rgba(241, 245, 249, 0.7);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 44px;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+    .lang-switch button.active {
+      background: #22c55e;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
+    }
+    .lang-switch button:not(.active):hover {
+      background: rgba(34, 197, 94, 0.2);
+      color: rgba(241, 245, 249, 0.9);
+    }
+  </style>
 </head>
 
   <body
     class="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 text-white"
-  ><main class="max-w-3xl mx-auto px-4 py-10">
+  >
+    <div class="lang-switch" role="tablist" aria-label="Language switcher">
+      <button type="button" data-lang="ko" class="active">KR</button>
+      <button type="button" data-lang="en">EN</button>
+    </div><main class="max-w-3xl mx-auto px-4 py-10">
       <header class="text-center mb-8 space-y-4">
         <div class="flex items-center justify-center gap-3 flex-wrap">
           <div
             class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10"
           >
-            <span class="text-emerald-300 text-sm font-semibold"
+            <span class="text-emerald-300 text-sm font-semibold" data-i18n="brandName"
               >두성터득기</span
             >
             <span class="text-white/50 text-sm">Pitch Analyzer MVP</span>
@@ -96,14 +138,14 @@
             class="flex items-center gap-2 text-sm bg-white/5 border border-white/10 rounded-full px-3 py-1 cursor-pointer"
           >
             <input id="beginnerToggle" type="checkbox" class="accent-emerald-400" />
-            <span>초보자 모드</span>
+            <span data-i18n="beginnerMode">초보자 모드</span>
           </label>
         </div>
         <div>
-          <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+          <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight" data-i18n="title">
             실시간 음정 분석
           </h1>
-          <p class="mt-2 text-white/70">
+          <p class="mt-2 text-white/70" data-i18n="subtitle">
             마이크 입력으로 Hz / 음이름 / 음역을 표시합니다. (진단이 아닌 연습
             보조 도구)
           </p>
@@ -223,58 +265,59 @@
               id="startBtn"
               class="px-4 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold transition-colors"
             >
-              마이크 시작
+              <span data-i18n="btnStart">마이크 시작</span>
             </button>
             <button
               id="stopBtn"
               class="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-semibold transition-colors"
               disabled
+              data-i18n="btnStop"
             >
               정지
             </button>
           </div>
           <div class="text-sm text-white/60">
-            샘플레이트: <span id="sr">-</span> Hz · 상태:
-            <span id="status">대기</span>
+            <span data-i18n="sampleRate">샘플레이트</span>: <span id="sr">-</span> Hz · <span data-i18n="statusLabel">상태</span>:
+            <span id="status" data-i18n="statusWaiting">대기</span>
           </div>
         </div>
 
         <div id="metricsPanel" class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3">
           <div class="rounded-xl bg-black/20 border border-white/10 p-4">
-            <p class="text-xs text-white/50">현재 음정</p>
+            <p class="text-xs text-white/50" data-i18n="currentPitch">현재 음정</p>
             <p class="mt-1 text-2xl font-extrabold"><span id="note">-</span></p>
             <p class="mt-1 text-sm text-white/60"><span id="cents">-</span></p>
           </div>
           <div class="rounded-xl bg-black/20 border border-white/10 p-4">
-            <p class="text-xs text-white/50">주파수(Hz)</p>
+            <p class="text-xs text-white/50" data-i18n="frequency">주파수(Hz)</p>
             <p class="mt-1 text-2xl font-extrabold"><span id="hz">-</span></p>
             <p class="mt-1 text-sm text-white/60">
-              볼륨: <span id="rms">-</span>
+              <span data-i18n="volume">볼륨</span>: <span id="rms">-</span>
             </p>
           </div>
           <div class="rounded-xl bg-black/20 border border-white/10 p-4">
-            <p class="text-xs text-white/50">음역(기록)</p>
+            <p class="text-xs text-white/50" data-i18n="range">음역(기록)</p>
             <p class="mt-1 font-semibold">
-              최저: <span id="minNote">-</span> · 최고:
+              <span data-i18n="min">최저</span>: <span id="minNote">-</span> · <span data-i18n="max">최고</span>:
               <span id="maxNote">-</span>
             </p>
             <p class="mt-1 text-sm text-white/60">
-              안정 최고음(대략): <span id="stableMax">-</span>
+              <span data-i18n="stableMaxNote">안정 최고음(대략)</span>: <span id="stableMax">-</span>
             </p>
           </div>
         </div>
 
-        <p class="mt-4 text-xs text-white/50">
-          ※ “안정 최고음”은 피치 검출 성공률/떨림이 상대적으로 좋은 구간을
+        <p class="mt-4 text-xs text-white/50" data-i18n="stableMaxNoteDesc">
+          ※ "안정 최고음"은 피치 검출 성공률/떨림이 상대적으로 좋은 구간을
           기반으로 대략 계산합니다.
         </p>
       </section>
 
       <!-- Mini coaching -->
       <section class="mt-6 rounded-2xl bg-white/5 border border-white/10 p-6">
-        <h2 class="text-lg font-bold">코치 한 줄</h2>
-        <p id="coach" class="mt-2 text-white/80 leading-relaxed">
-          마이크를 시작하고 편한 음에서 위로 ‘슬라이드’해 보세요. 힘으로
+        <h2 class="text-lg font-bold" data-i18n="coachTitle">코치 한 줄</h2>
+        <p id="coach" class="mt-2 text-white/80 leading-relaxed" data-i18n="coachDefault">
+          마이크를 시작하고 편한 음에서 위로 '슬라이드'해 보세요. 힘으로
           밀기보다 가볍게 연결하는 느낌을 찾는 게 먼저입니다.
         </p>
       </section>
@@ -285,8 +328,8 @@
       >
         <div class="flex items-start justify-between gap-3 flex-wrap">
           <div>
-            <h2 class="text-lg font-bold">자동 분석 결과</h2>
-            <p class="mt-1 text-sm text-white/60">
+            <h2 class="text-lg font-bold" data-i18n="analysisTitle">자동 분석 결과</h2>
+            <p class="mt-1 text-sm text-white/60" data-i18n="analysisDesc">
               불안정 구간 계산, 성종(경향) 분류, 취약 루프 가이드를 바로 확인하세요.
             </p>
           </div>
@@ -444,7 +487,7 @@
           rel="noopener noreferrer"
           class="px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-lg font-medium transition-colors duration-200"
         >
-          다른 서비스 보기
+          <span data-i18n="btnOtherServices">다른 서비스 보기</span>
         </a>
       </div>
 
@@ -454,6 +497,166 @@
     </main>
 
     <script>
+      // =========================
+      // i18n
+      // =========================
+      const translations = {
+        ko: {
+          metaTitle: "두성터득기 - 실시간 음정 분석",
+          brandName: "두성터득기",
+          beginnerMode: "초보자 모드",
+          title: "실시간 음정 분석",
+          subtitle: "마이크 입력으로 Hz / 음이름 / 음역을 표시합니다. (진단이 아닌 연습 보조 도구)",
+          btnStart: "마이크 시작",
+          btnStop: "정지",
+          sampleRate: "샘플레이트",
+          statusLabel: "상태",
+          statusWaiting: "대기",
+          currentPitch: "현재 음정",
+          frequency: "주파수(Hz)",
+          volume: "볼륨",
+          range: "음역(기록)",
+          min: "최저",
+          max: "최고",
+          stableMaxNote: "안정 최고음(대략)",
+          stableMaxNoteDesc: "※ \"안정 최고음\"은 피치 검출 성공률/떨림이 상대적으로 좋은 구간을 기반으로 대략 계산합니다.",
+          coachTitle: "코치 한 줄",
+          coachDefault: "마이크를 시작하고 편한 음에서 위로 '슬라이드'해 보세요. 힘으로 밀기보다 가볍게 연결하는 느낌을 찾는 게 먼저입니다.",
+          analysisTitle: "자동 분석 결과",
+          analysisDesc: "불안정 구간 계산, 성종(경향) 분류, 취약 루프 가이드를 바로 확인하세요.",
+          btnOtherServices: "다른 서비스 보기",
+          centsExact: "정확",
+          centsPositive: "+{cents} cents",
+          centsNegative: "{cents} cents",
+        },
+        en: {
+          metaTitle: "Head Voice Trainer - Realtime Pitch Analysis",
+          brandName: "Head Voice Trainer",
+          beginnerMode: "Beginner Mode",
+          title: "Realtime Pitch Analysis",
+          subtitle: "Displays Hz / note name / range from microphone input. (Practice aid, not diagnosis)",
+          btnStart: "Start Mic",
+          btnStop: "Stop",
+          sampleRate: "Sample Rate",
+          statusLabel: "Status",
+          statusWaiting: "Waiting",
+          currentPitch: "Current Pitch",
+          frequency: "Frequency (Hz)",
+          volume: "Volume",
+          range: "Range (Recorded)",
+          min: "Min",
+          max: "Max",
+          stableMaxNote: "Stable Max (approx)",
+          stableMaxNoteDesc: "※ \"Stable Max\" is roughly calculated based on intervals with relatively good pitch detection success rate/tremor.",
+          coachTitle: "Coach Line",
+          coachDefault: "Start the mic and slide up from a comfortable note. Finding the feeling of connecting lightly rather than pushing with force comes first.",
+          analysisTitle: "Auto Analysis Results",
+          analysisDesc: "Check unstable interval calculation, voice type (tendency) classification, and weak loop guide right away.",
+          btnOtherServices: "View Other Services",
+          centsExact: "Exact",
+          centsPositive: "+{cents} cents",
+          centsNegative: "{cents} cents",
+        },
+      };
+
+      const defaultLang = "ko";
+      const supportedLangs = ["ko", "en"];
+      let currentLang = defaultLang;
+
+      function t(key, vars = {}) {
+        const langTable = translations[currentLang] || translations.ko;
+        let template = langTable?.[key] ?? translations.ko?.[key] ?? key;
+        if (typeof template !== "string") return template;
+        Object.keys(vars).forEach((k) => {
+          template = template.replace(new RegExp(`\\{${k}\\}`, "g"), vars[k]);
+        });
+        return template;
+      }
+
+      function applyTranslations() {
+        document.title = t("metaTitle");
+        document.documentElement.lang = currentLang;
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+          el.textContent = t(el.dataset.i18n);
+        });
+        document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+          el.innerHTML = t(el.dataset.i18nHtml);
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+          if (el.tagName === "TITLE") {
+            el.textContent = t(el.dataset.i18nTitle);
+          } else {
+            el.title = t(el.dataset.i18nTitle);
+          }
+        });
+        document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+          el.placeholder = t(el.dataset.i18nPlaceholder);
+        });
+        document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+          el.setAttribute("aria-label", t(el.dataset.i18nAria));
+        });
+        document.querySelectorAll("[data-i18n-alt]").forEach((el) => {
+          el.setAttribute("alt", t(el.dataset.i18nAlt));
+        });
+      }
+
+      function detectLang() {
+        const params = new URLSearchParams(window.location.search);
+        const paramLang = params.get("lang");
+        if (supportedLangs.includes(paramLang)) return paramLang;
+        const stored = localStorage.getItem("preferredLang");
+        if (supportedLangs.includes(stored)) return stored;
+        const intlLocale =
+          typeof Intl === "object" && typeof Intl.DateTimeFormat === "function"
+            ? Intl.DateTimeFormat().resolvedOptions().locale
+            : "";
+        const sources = [
+          ...(navigator.languages || []),
+          navigator.language,
+          navigator.userLanguage,
+          intlLocale,
+        ]
+          .filter(Boolean)
+          .map((locale) => locale.toLowerCase());
+        const hasKorean = sources.some((locale) => locale.startsWith("ko"));
+        return hasKorean ? "ko" : "en";
+      }
+
+      function setLang(lang, options = {}) {
+        const nextLang = supportedLangs.includes(lang) ? lang : defaultLang;
+        currentLang = nextLang;
+        window.currentLang = currentLang;
+        document.documentElement.lang = nextLang;
+        localStorage.setItem("preferredLang", nextLang);
+        document.querySelectorAll(".lang-switch button").forEach((button) => {
+          button.classList.toggle("active", button.dataset.lang === nextLang);
+        });
+        applyTranslations();
+        if (options.updateUrl) {
+          const url = new URL(window.location.href);
+          url.searchParams.set("lang", nextLang);
+          window.history.replaceState({}, "", url);
+        }
+        // Update dynamic content
+        if (window.$) {
+          const statusEl = $("status");
+          if (statusEl) statusEl.textContent = t("statusWaiting");
+        }
+      }
+
+      document.querySelectorAll(".lang-switch button").forEach((button) => {
+        button.addEventListener("click", () => {
+          setLang(button.dataset.lang, { updateUrl: true });
+        });
+      });
+
+      setLang(detectLang(), { updateUrl: false });
+
+      // Make t() function and currentLang globally available
+      window.t = t;
+      window.currentLang = currentLang;
+      window.setLang = setLang;
+
       const $ = (id) => document.getElementById(id);
 
       $("year").textContent = new Date().getFullYear();
@@ -873,12 +1076,13 @@
 
         $("hz").textContent = freq.toFixed(1);
         $("note").textContent = name;
+        const t = window.t || ((key, vars = {}) => key);
         $("cents").textContent =
           cents === 0
-            ? "정확"
+            ? t("centsExact")
             : cents > 0
-            ? `+${cents} cents`
-            : `${cents} cents`;
+            ? t("centsPositive", { cents })
+            : t("centsNegative", { cents });
         $("rms").textContent = rms.toFixed(3);
 
         if (midi < minMidi) minMidi = midi;
