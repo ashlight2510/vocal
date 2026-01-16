@@ -9,10 +9,12 @@
     <meta
       name="description"
       content="마이크로 내 음역과 불안정 구간을 분석하고 두성 훈련 루트를 제안하는 보컬 트레이닝 도구."
+      data-i18n-content="metaDescription"
     />
     <meta
       name="keywords"
       content="두성, 보컬, 음역, 음정 분석, 헤드보이스, 트레이닝"
+      data-i18n-content="metaKeywords"
     />
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://temple.funnyfunny.cloud/" />
@@ -860,7 +862,7 @@
       function getBaseCoach() {
         return t("coachDefault");
       }
-      const BASE_COACH = getBaseCoach();
+      // BASE_COACH will be retrieved dynamically via getBaseCoach()
 
       function freqToMidi(freq) {
         return 69 + 12 * Math.log2(freq / 440);
