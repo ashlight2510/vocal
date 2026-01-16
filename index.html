@@ -806,9 +806,11 @@
             analyzeWeakSpot();
             classifyVoiceTrend();
           }
-          // Update coach if in beginner mode
+          // Update coach
           if (beginnerMode) {
             $("coach").textContent = t("beginnerCoach");
+          } else {
+            $("coach").textContent = getBaseCoach();
           }
         }
         if (options.updateUrl) {
